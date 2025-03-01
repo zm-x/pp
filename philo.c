@@ -6,7 +6,7 @@
 /*   By: zael-mou <zael-mou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/25 14:28:39 by zael-mou          #+#    #+#             */
-/*   Updated: 2025/02/28 17:03:56 by zael-mou         ###   ########.fr       */
+/*   Updated: 2025/03/01 14:28:02 by zael-mou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,40 +78,45 @@ long get_time()
 void    *all(void *p)
 {
     data_t *philo;
+    int dead;
 
     philo = (data_t *)p;
+    dead = 0;
     philo->left_fork = philo->place % philo->nphilo;
     philo->right_fork = (philo->left_fork + 1) % philo->nphilo;
+    philo->last_eat = get_time();
     while (1)
     {
         pthread_mutex_lock(philo->print);
-        printf("%ld %d is thinking\n", get_time() - philo->curent_time, philo->place + 1);
-        usleep(200);
-        pthread_mutex_unlock(philo->print);
-        if (philo->place % 2 == 0)
+        if (*philo->is_dead)
         {
-            pthread_mutex_lock(&philo->forks[philo->left_fork]);
-            pthread_mutex_lock(philo->print);
-            printf("%ld %d has taken a fork\n", get_time() - philo->curent_time, philo->place + 1);
             pthread_mutex_unlock(philo->print);
-            pthread_mutex_lock(&philo->forks[philo->right_fork]);
-            pthread_mutex_lock(philo->print);
-            printf("%ld %d has taken a fork\n", get_time() - philo->curent_time, philo->place + 1);
-            pthread_mutex_unlock(philo->print);        }
-        else
-        {
-            pthread_mutex_lock(&philo->forks[philo->right_fork]);
-            pthread_mutex_lock(philo->print);
-            printf("%ld %d has taken a fork\n", get_time() - philo->curent_time, philo->place + 1);
-            pthread_mutex_unlock(philo->print);
-            pthread_mutex_lock(&philo->forks[philo->left_fork]);
-            pthread_mutex_lock(philo->print);
-            printf("%ld %d has taken a fork\n", get_time() - philo->curent_time, philo->place + 1);
-            pthread_mutex_unlock(philo->print);
+            break;
         }
+        pthread_mutex_unlock(philo->print);
+        if (get_time() - philo->last_eat > philo->ndie)
+        {
+            pthread_mutex_lock(philo->print);
+            printf("%ld %d is died\n",  get_time() - philo->curent_time, philo->place + 1);
+            *philo->is_dead = 1;
+            pthread_mutex_unlock(philo->print);
+            break;
+        }
+        pthread_mutex_lock(philo->print);
+        printf("%ld %d is thinking\n", get_time() - philo->curent_time, philo->place + 1);
+        pthread_mutex_unlock(philo->print);
+        if (philo->place % 2 != 0)
+            usleep(500);
+        pthread_mutex_lock(&philo->forks[philo->left_fork]);
+        pthread_mutex_lock(&philo->forks[philo->right_fork]);
+        pthread_mutex_lock(philo->print);
+        printf("%ld %d has taken a fork\n", get_time() - philo->curent_time, philo->place + 1);
+        printf("%ld %d has taken a fork\n", get_time() - philo->curent_time, philo->place + 1);
+        pthread_mutex_unlock(philo->print);
         pthread_mutex_lock(philo->print);
         printf("%ld %d is eating\n", get_time() - philo->curent_time, philo->place + 1);
         pthread_mutex_unlock(philo->print);
+        philo->last_eat = get_time();
         usleep(philo->neat * 1000);
         pthread_mutex_unlock(&philo->forks[philo->left_fork]);
         pthread_mutex_unlock(&philo->forks[philo->right_fork]);
@@ -131,17 +136,21 @@ int main(int ac, char **av)
     pthread_mutex_t forks[200];
     pthread_mutex_t print;
     long start;
+    int is_dead;
 
     i = 0;
     if (ac < 5 || ac > 6)
         error_func();
     start = get_time();
     pthread_mutex_init(&print, NULL);
+    is_dead = 0;
     while (i < ft_atoi(av[1]))
         pthread_mutex_init(&forks[i++], NULL);
     i = 0;
     while (i < ft_atoi(av[1]))
     {
+        philo[i].is_dead = &is_dead;
+        philo[i].av = ft_atoi(av[2]);
         philo[i].place = i;
         philo[i].forks = forks;
         philo[i].print = &print;
@@ -158,7 +167,12 @@ int main(int ac, char **av)
     i = 0;
     while (i < philo[0].nphilo)
     {
+        if (is_dead)
+            break;
         pthread_join(thread[i], NULL);
         i++;
-    }   
+    }
+    pthread_mutex_destroy(&print);
+    for (int i = 0; i < ft_atoi(av[1]); i++)
+        pthread_mutex_destroy(&forks[i]);
 }
