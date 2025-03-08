@@ -17,4 +17,7 @@ clean:
 fclean: clean
 	rm -f ${NAME}
 
-ra: all clean
+f:
+	clear
+
+ra: all clean f

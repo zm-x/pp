@@ -6,7 +6,7 @@
 /*   By: zael-mou <zael-mou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/25 14:24:53 by zael-mou          #+#    #+#             */
-/*   Updated: 2025/02/28 18:27:47 by zael-mou         ###   ########.fr       */
+/*   Updated: 2025/03/08 15:52:18 by zael-mou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,13 @@ typedef struct philos
     int right_fork;
     int av;
     int *is_dead;
+    int check_left;
+    int check_right;
     pthread_mutex_t *forks;
     pthread_mutex_t sleep;
     pthread_mutex_t *print;
+    pthread_mutex_t *dead;
+    pthread_mutex_t *eatt;
     pthread_mutex_t think;
     pthread_mutex_t eat;
 }   data_t;
