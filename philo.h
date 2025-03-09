@@ -6,7 +6,7 @@
 /*   By: zael-mou <zael-mou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/25 14:24:53 by zael-mou          #+#    #+#             */
-/*   Updated: 2025/03/08 15:52:18 by zael-mou         ###   ########.fr       */
+/*   Updated: 2025/03/09 20:32:24 by zael-mou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,5 +43,20 @@ typedef struct philos
     pthread_mutex_t think;
     pthread_mutex_t eat;
 }   data_t;
+
+typedef struct utilis
+{
+    int				i;
+	pthread_t		thread[200];
+	pthread_t		lm9dm;
+	pthread_mutex_t	forks[200];
+	data_t	philo[200];
+	pthread_mutex_t	print;
+	pthread_mutex_t	eatt;
+	pthread_mutex_t	dead;
+	long			start;
+    int             error;
+	int				is_dead;
+}   utilis_t;
 
 #endif
